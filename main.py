@@ -30,13 +30,6 @@ cell_width = surface.get_width()/CELLS_COLUMNS
 cell_height = surface.get_height()/CELLS_ROWS
 total_cells = CELLS_ROWS*CELLS_COLUMNS
 
-def initialize_cells(cells):
-    for i in range(CELLS_ROWS):
-        row = []
-        for j in range(CELLS_COLUMNS):
-            row.append(CELL_DEAD)
-        cells.append(row)
-
 def draw_cells(cells, live_cells_color):
     population = 0
 
@@ -86,23 +79,18 @@ def simulate_evolution(cells):
         for j in range(CELLS_COLUMNS):
             cells[i][j] = next_cells[i][j]
 
-def mouse_interaction(pos, button, cells, live_cells_color):
-    if (button==2): return
-
+def mouse_interaction(pos, edit_mode, cells, live_cells_color):
     (mouse_x, mouse_y) = pos
     cell_row = mouse_y//int(cell_height)
     cell_col = mouse_x//int(cell_width)
 
-    mode = CREATE_CELL if button==1 else DELETE_CELL
-    cell_state = CELL_ALIVE if mode==CREATE_CELL else CELL_DEAD
+    cell_state = CELL_ALIVE if edit_mode==CREATE_CELL else CELL_DEAD
 
     cells[cell_row][cell_col] = cell_state
     draw_cell(cell_row, cell_col, cell_state, live_cells_color)
 
 def main():
-    cells = []
-
-    initialize_cells(cells)
+    cells = [[CELL_DEAD for _ in range(CELLS_COLUMNS)] for _ in range(CELLS_ROWS)]
 
     cells_mid_row = CELLS_ROWS//2
     cells_mid_col = CELLS_COLUMNS//2
@@ -130,10 +118,11 @@ def main():
                     simulate = not simulate
             if event.type == pygame.MOUSEMOTION:
                 (button1, _, button3) = event.buttons
-                button = 2
-                if button1==1: button=1
-                elif button3==1: button=3
-                mouse_interaction(event.pos, button, cells, live_cells_color)
+                if not button1 and not button3: continue
+
+                edit_mode = CREATE_CELL if button1 else DELETE_CELL
+
+                mouse_interaction(event.pos, edit_mode, cells, live_cells_color)
 
         surface.fill(BACKGROUND_COLOR)
 
