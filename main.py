@@ -1,5 +1,4 @@
 import pygame
-import random
 import copy
 
 W_WIDTH = 800
