@@ -1,15 +1,20 @@
 import pygame
 import copy
 
+# Window constants
 W_WIDTH = 800
 W_HEIGHT = 600
-FONT_SIZE=24
+FRAMERATE = 30
+BACKGROUND_COLOR = "black"
+
+# Text constants
+FONT_SIZE = 24
 TEXT_COLOR = (255, 255, 255)
 TEXT_TOP_MARGIN = 10
 TEXT_LEFT_MARGIN = 10
 TEXT_SEPARATION = 5
-FRAMERATE = 30
-BACKGROUND_COLOR = "black"
+
+# Cells constants
 CELL_COLOR = "white"
 BASE_COLOR = "whitesmoke"
 LERP_COLOR = "red4"
@@ -20,15 +25,17 @@ CELL_DEAD = 0
 CREATE_CELL = 1
 DELETE_CELL = 0
 
+# Pygame constants
 pygame.init()
 surface = pygame.display.set_mode((W_WIDTH, W_HEIGHT))
 clock = pygame.time.Clock()
 my_font = pygame.font.Font(None, FONT_SIZE)
-cell_color = pygame.Color(BASE_COLOR)
 
+# Cells variables
+total_cells = CELLS_ROWS*CELLS_COLUMNS
+cell_color = pygame.Color(BASE_COLOR)
 cell_width = surface.get_width()/CELLS_COLUMNS
 cell_height = surface.get_height()/CELLS_ROWS
-total_cells = CELLS_ROWS*CELLS_COLUMNS
 
 def draw_cells(cells, live_cells_color):
     population = 0
