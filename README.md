@@ -13,8 +13,8 @@ https://github.com/user-attachments/assets/a5aed11f-e68e-400d-b67d-199aef7ee917
 6. python main.py
 
 ## Controls
-~ Start/stop simulation: space
-~ Start over with random cells: R
+~ Start/stop simulation: space\
+~ Start over with random cells: R\
 ~ Start over empty: C
 
 More info of Game of Life [Wikipedia](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
