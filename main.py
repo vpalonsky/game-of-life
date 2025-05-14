@@ -1,10 +1,9 @@
-import pygame
-import copy
+import pygame, copy, random
 
 # Window constants
 W_WIDTH = 800
 W_HEIGHT = 600
-FRAMERATE = 30
+FPS = 30
 BACKGROUND_COLOR = "black"
 
 # Text constants
@@ -24,6 +23,45 @@ CELL_ALIVE = 1
 CELL_DEAD = 0
 CREATE_CELL = 1
 DELETE_CELL = 0
+RANDOM_SHAPES_CANT = 20
+PATTERN_SHAPES = [
+    {
+        "size": [0, 1, 0, 1],
+        "shape": [(0,0), (0,1), (1,0), (1,1)]
+    },
+    {
+        "size": [-1, 2, -1, 1],
+        "shape": [(0, -1), (1, -1), (-1, 0), (2, 0), (0, 1), (1, 1)]
+    },
+    {
+        "size": [-2, 1, -1, 2],
+        "shape": [(-1, -1), (0, -1), (-2, 0), (1, 0), (-1, 1), (1, 1), (0, 2)]
+    },
+    {
+        "size": [-1, 2, 0, 1],
+        "shape": [(0, 0), (1, 0), (2, 0), (-1, 1), (0, 1), (1, 1)]
+    },
+    {
+        "size": [-1, 1, -5, 6],
+        "shape": [(-1, -5), (0, -5), (1, -5), (0, -4), (0, -3), (-1, -2), (0, -2), (1, -2), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (-1, 3), (0, 3), (1, 3), (0, 4), (0, 5), (-1, 6), (0, 6), (1, 6)]
+    },
+    {
+        "size": [-1, 1, -1, 1],
+        "shape": [(0, -1), (1, 0), (-1, 1), (0, 1), (1, 1)]
+    },
+    {
+        "size": [-2, 2, -1, 2],
+        "shape": [(-2, -1), (1, -1), (2, 0), (-2, 1), (2, 1), (-1, 2), (0, 2), (1, 2), (2, 2)]
+    },
+    {
+        "size": [-2, 3, -2, 2],
+        "shape": [(-1, -2), (0, -2), (1, -2), (2, -2), (3, -2), (-2, -1), (3, -1), (3, 0), (-2, 1), (2, 1), (0, 2)]
+    },
+    {
+        "size": [-3, 3, -2, 2],
+        "shape": [(-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2), (3, -2), (-3, -1), (3, -1), (3, 0), (-3, 1), (2, 1), (-1, 2), (0, 2)]
+    }
+]
 
 # Pygame constants
 pygame.init()
@@ -46,10 +84,8 @@ def draw_cells(cells, live_cells_color):
             cell_x = cell_width*j
             cell_y= cell_height*i
 
-            live_cell = cell_state==CELL_ALIVE
-            if live_cell: population+=1
-            cell_color = live_cells_color if live_cell else BACKGROUND_COLOR
-            pygame.draw.rect(surface, cell_color, pygame.Rect(cell_x, cell_y, cell_width, cell_height))
+            if cell_state==CELL_ALIVE: population+=1
+            draw_cell(cell_x, cell_y, cell_state, live_cells_color)
 
     return population
 
@@ -96,24 +132,32 @@ def mouse_interaction(pos, edit_mode, cells, live_cells_color):
     cells[cell_row][cell_col] = cell_state
     draw_cell(cell_row, cell_col, cell_state, live_cells_color)
 
+def generate_random_cells(cells):
+    shape_fits = lambda shape_size, row, col : row >= abs(shape_size[2]) and row <= CELLS_ROWS-shape_size[3]-1 and col >= abs(shape_size[0]) and col <= CELLS_COLUMNS-shape_size[1]-1
+
+    for i in range(RANDOM_SHAPES_CANT):
+        random_cell_row = random.randint(0, CELLS_ROWS-1)
+        random_cell_col = random.randint(0, CELLS_COLUMNS-1)
+        random_shape = PATTERN_SHAPES[random.randint(0, len(PATTERN_SHAPES)-1)]
+
+        if shape_fits(random_shape["size"], random_cell_row, random_cell_col):
+            for (relative_col, relative_row) in random_shape["shape"]:
+                new_row = random_cell_row+relative_row
+                new_col = random_cell_col+relative_col
+
+                cells[new_row][new_col] = CELL_ALIVE
+
 def main():
     cells = [[CELL_DEAD for _ in range(CELLS_COLUMNS)] for _ in range(CELLS_ROWS)]
-
-    cells_mid_row = CELLS_ROWS//2
-    cells_mid_col = CELLS_COLUMNS//2
-    cells[cells_mid_row][cells_mid_col] = 1
-    cells[cells_mid_row-1][cells_mid_col] = 1
-    cells[cells_mid_row+1][cells_mid_col] = 1
-    cells[cells_mid_row][cells_mid_col-1] = 1
-    cells[cells_mid_row+1][cells_mid_col+1] = 1
-
     running = True
     simulate = False
     generation = 0
     population = 0
 
+    generate_random_cells(cells)
+
     while running:
-        live_cells_color = cell_color.lerp(LERP_COLOR, 1 if population/(total_cells//5)>1 else population/(total_cells//5))
+        live_cells_color = cell_color.lerp(LERP_COLOR, 1 if population/total_cells>1 else population/(total_cells//5))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -123,6 +167,11 @@ def main():
                     running = False
                 if event.key == pygame.K_SPACE:
                     simulate = not simulate
+                if event.key == pygame.K_r:
+                    simulate = False
+                    generation = 0
+                    cells = [[CELL_DEAD for _ in range(CELLS_COLUMNS)] for _ in range(CELLS_ROWS)]
+                    generate_random_cells(cells)
             if event.type == pygame.MOUSEMOTION:
                 (button1, _, button3) = event.buttons
                 if not button1 and not button3: continue
@@ -148,7 +197,7 @@ def main():
 
         pygame.display.flip()
 
-        clock.tick(FRAMERATE)
+        clock.tick(FPS)
 
     pygame.quit()
 
