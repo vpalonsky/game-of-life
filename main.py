@@ -172,6 +172,10 @@ def main():
                     generation = 0
                     cells = [[CELL_DEAD for _ in range(CELLS_COLUMNS)] for _ in range(CELLS_ROWS)]
                     generate_random_cells(cells)
+                if event.key == pygame.K_c:
+                    simulate = False
+                    generation = 0
+                    cells = [[CELL_DEAD for _ in range(CELLS_COLUMNS)] for _ in range(CELLS_ROWS)]
             if event.type == pygame.MOUSEMOTION:
                 (button1, _, button3) = event.buttons
                 if not button1 and not button3: continue
